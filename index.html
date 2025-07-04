@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta a Laura</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #000;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .carta-container {
+            max-width: 800px;
+            width: 90%;
+            margin: 100px auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .carta {
+            background: #f5e6c8; /* Fondo opaco de pergamino */
+            border: 15px double #5a3921;
+            border-radius: 8px;
+            padding: 50px 40px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 255, 200, 0.3) inset;
+            line-height: 1.8;
+            position: relative;
+            transform: rotate(0.5deg);
+        }
+
+        .carta::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%235a3921' fill-opacity='0.06' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .carta-content {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+
+        .carta-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .carta-content::-webkit-scrollbar-track {
+            background: rgba(90, 57, 33, 0.1);
+            border-radius: 4px;
+        }
+
+        .carta-content::-webkit-scrollbar-thumb {
+            background: rgba(90, 57, 33, 0.3);
+            border-radius: 4px;
+        }
+
+        .titulo {
+            font-family: 'Palatino Linotype', 'Book Antiqua', serif;
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            color: #5a3921;
+            text-align: center;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .titulo::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #5a3921, transparent);
+        }
+
+        .contenido {
+            font-size: 1.15rem;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+
+        .contenido p {
+            margin-bottom: 25px;
+            text-indent: 30px;
+            position: relative;
+        }
+
+        .contenido p::first-letter {
+            font-family: 'Times New Roman', serif;
+            font-size: 2.5rem;
+            float: left;
+            line-height: 0.8;
+            padding-right: 8px;
+            color: #5a3921;
+            margin-top: 8px;
+        }
+
+        .firma {
+            font-family: 'Brush Script MT', 'Dancing Script', cursive;
+            font-size: 2.2rem;
+            color: #5a3921;
+            margin-top: 20px;
+            text-align: right;
+            padding-right: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .carta {
+                padding: 35px 25px;
+            }
+            
+            .titulo {
+                font-size: 2.2rem;
+            }
+            
+            .contenido {
+                font-size: 1.05rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .carta {
+                padding: 25px 15px;
+                border-width: 10px;
+            }
+            
+            .titulo {
+                font-size: 1.8rem;
+            }
+            
+            .contenido p::first-letter {
+                font-size: 2rem;
+            }
+            
+            .firma {
+                font-size: 1.8rem;
+            }
+        }
+
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(245, 230, 200, 0.8);
+            border: 2px solid #5a3921;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-control i {
+            font-size: 24px;
+            color: #5a3921;
+        }
+    </style>
+</head>
+<body>
+    <div id="starCanvas"></div>
+    
+    <div class="carta-container">
+        <div class="carta">
+            <div class="carta-content">
+                <h1 class="titulo">A Laura.</h1>
+                <div class="contenido">
+                    <p>Las noches en que me pregunté que significa Laura para mí, no supe responder la pregunta. Claro está que el regalo depende de a quien se le da, y cuanto se tiene. Pero, ¿cuánto soy capaz de dar por Laura? Eso no lo he sabido responder tampoco. Llevaba tanto tiempo encontrando valor a todo, a mis proyectos, a la música, a los amigos, famlia, que en lo mecánico del ejercicio no he sabido darle valor a nada. Años han pasado desde mi primer intento por dar con tu valor, tu sentido. Justo antes de pandemia recordarás que cierto día llegué como extranjero con la mirada ingenua con que el viajero busca su proposito, esa ingenuidad con que el niño ve los dulces, pero también la amargura con la que el niño ve las verduras. Lo importante es que desde ese momento donde la duda, el arrepentimiento y la ilusión de un amor tan cerca pero tan lejos tatuaron desde entonces nuestra historia. A unos cuantos metros el suspiro y tus sueños reposan; es casi como que por más juntos que estemos, nuestros cuerpos buscan alejarse, hasta llegar a un punto, donde la atracción vuelve, en un gigante ir y venir místico casi como el de la escritura.</p>
+
+                    <p>Antes de que nos volvieramos a ver, existió el remordimiento de un futuro no visto, donde ni los amigos, ni el tiempo fueran los antagonistas de lo que pudo ser. Las estrellas envidian ciertamente el brillo de tus ojos, dulces, díficiles, pero sobre todo tiernos. Desde el primer día tu mirada ha sido complice de cuánta estupidez digo, tu sonrisa ha sido la testigo de mi escape del sueño por las bromas, y tu corazón al menos una vez se ha sincronizado con el mío como el reloj. El tiempo es el mayor testigo de la historia, del va y ven de los pesares, y las indirectas frases entre los dos. Tal vez por eso es que el año pasado, casi como un acto de redención, el tiempo nos reunió de nuevo. Esa noche, entre la pasarela de las casas donde jugamos encontramos algo más profundo que lo que las palabras pueden describir. Tus ojos iluminaban la noche que abrió el campo estrellado, y sin tocarnos, las pieles encontraron en el pasto una manera de escapar, y mientras nuestros cuerpos ya inhertes no se miraban, nuestros corazones tomados de la mano tomaban todas su fuerzas para volar en las estrellas, estrellas que tanto te fascinan y que intenté crear en esta página. Tu mundo, mi mundo, y nuestra historia encontraron una manera de ser más íntimos que un te quiero, y sin vernos lo suficiente ya conocíamos muchos más del otro.</p>
+                    <p>Ultimamente ese pensamiento de regocijo y de paz que tanto caracteriza la armonía de tu cara llegó a mí por medio de estos recuerdos, lo suficientemente memorables como para poder injertar en esta página. Tal vez con motivo de tu cumpleaños aprovecho la excusa para escribirle a Laura, y para intentar encontrarle el valor que se merece, pero ciertamente es imposible. Una idea tan abstracta, pensamiento tan permanente y unas ganas tan indomables crean en mí una tensión que desborda todas las palabras, y los sueños que se desbordan en la piel, encuetran en tus delicadas manos (por muy violentas que sean) una excusa para limpiar esa sed de ti que en el va y ven que nos caracteriza, nos persigue</p>
+                    <p>Raro es que el tiempo haya encontrado el día de hoy 5 de julio (pues espero que hayas encontrado la carta y leído este día), un día especial como tu cumpleaños que recuerda como los años pasan y como el va y ven como el ciclo del sistema solar nos encuentra. Lastimosamente no te puedo ver hoy, como ha pasado antes, y por más que lo intente una vez más, estando casi lo suficientemente pegados, donde casi puedo respirar tu mismo aliento, nuevamente nos aleje el día de hoy. Espero que eso no sea así más. No acostumbro a gastar mis palabras, pues valen mucho, y entre líneas creo que puedes entender lo mucho que vales.</p>
+                    <p>Acuerdate lo que te dije apenas te pasé la carta en blanco (lo de celebrar un día de estos tu cumpleaños),y feliz cumpleaños, ya sabes que tan especial eres para mí, pues entre las grosería, insultos, risas y caricias hay algo que nunca nos va a permitir decirnos adiós</p>
+                    
+                </div>
+                <div class="firma">Con cariño,<br>Cristhian</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="music-control" id="musicControl">
+        <i>♪</i>
+    </div>
+
+    <audio id="backgroundMusic" loop>
+        <source src="https://github.com/cr1dm/blog/blob/main/Tu%20y%20Yo.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Configuración de Three.js para el fondo de estrellas
+        let scene, camera, renderer, particles;
+        const particleCount = 20000;
+        const maxRadius = 500;
+
+        function init() {
+            // Crear escena
+            scene = new THREE.Scene();
+            
+            // Crear cámara
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.z = 400;
+            
+            // Crear renderizador
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true,
+                canvas: document.createElement('canvas')
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('starCanvas').appendChild(renderer.domElement);
+            
+            // Crear partículas
+            createParticles();
+            
+            // Luz ambiental para iluminar las partículas
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            // Luz direccional para dar profundidad
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+            
+            // Manejar redimensionamiento
+            window.addEventListener('resize', onWindowResize);
+            
+            // Iniciar animación
+            animate();
+        }
+
+        function createParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            
+            // Crear partículas en una esfera
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                
+                // Distribución esférica
+                const radius = Math.random() * maxRadius;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                
+                positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i3 + 2] = radius * Math.cos(phi);
+                
+                // Tamaño: la mayoría pequeñas, algunas más grandes (como estrellas cercanas)
+                const size = Math.random() > 0.98 ? Math.random() * 3 + 2 : Math.random() * 1.5 + 0.5;
+                sizes[i] = size;
+                
+                // Color: blanco con variación de intensidad
+                const intensity = Math.random() * 0.8 + 0.2;
+                colors[i3] = intensity;     // R
+                colors[i3 + 1] = intensity; // G
+                colors[i3 + 2] = intensity; // B
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            // Material de partículas
+            const material = new THREE.PointsMaterial({
+                size: 1.5,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                sizeAttenuation: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotación suave en ambos ejes
+            if (particles) {
+                particles.rotation.y += 0.0005;
+                particles.rotation.x += 0.0002;
+            }
+            
+            // Movimiento adicional para algunas estrellas (efecto parálax)
+            const time = Date.now() * 0.0001;
+            particles.position.x = Math.sin(time * 0.7) * 10;
+            particles.position.y = Math.cos(time * 0.5) * 10;
+            
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Control de música
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicControl = document.getElementById('musicControl');
+        let musicPlaying = false;
+        
+        // Función para reproducir música
+        function playMusic() {
+            backgroundMusic.play()
+                .then(() => {
+                    musicPlaying = true;
+                    musicControl.innerHTML = '<i>♪</i>';
+                })
+                .catch(error => {
+                    console.log("La reproducción automática fue bloqueada. Haz clic para reproducir.");
+                });
+        }
+        
+        // Intentar reproducir música automáticamente
+        playMusic();
+        
+        // Control manual de la música
+        musicControl.addEventListener('click', () => {
+            if (musicPlaying) {
+                backgroundMusic.pause();
+                musicControl.innerHTML = '<i>♫</i>';
+                musicPlaying = false;
+            } else {
+                backgroundMusic.play();
+                musicControl.innerHTML = '<i>♪</i>';
+                musicPlaying = true;
+            }
+        });
+
+        // Reproducir música cuando el usuario interactúe con la página
+        document.addEventListener('click', () => {
+            if (!musicPlaying) {
+                playMusic();
+            }
+        });
+
+        // Iniciar la animación cuando la página esté cargada
+        window.onload = init;
+    </script>
+</body>
+</html>
